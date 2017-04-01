@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Редактор списка фраз</title>
+
+    <!-- Bootstrap -->
+    <link href="http://bootstrap-3.ru/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <style>
+       /* .flex{
+            display: flex;
+        }
+      
+        .flex>main{
+            flex-grow: 3;
+        }
+        .flex aside button{
+            width: 200px;
+            padding: .55rem 1rem;
+            margin: .37rem;
+            flex-grow: 1;
+            background: #ccc;
+            color: #222;
+            border: 1px solid #666;
+        }
+        .flex main     */
+        
+        #project textarea{
+            width: 80%;
+            margin: 2rem 10%;
+            height: 40vh;
+        }
+        #project aside{
+            width: 35%;
+            height: 100vh;
+            overflow-y: auto;
+            display: flex; 
+            flex-wrap: wrap;
+            flex-grow: 1;
+        }
+        #project button{
+            width: 200px;
+            padding: .55rem 1rem;
+            margin: .37rem;
+            flex-grow: 1;
+            white-space: normal !important;
+        }
+    </style>
+</head>
+<body>
+    <div  id='project'>
+        <aside class='col-lg-5 col-md-6 col-sm-6 col-xs-6'><!--создаем группу кнопок--> 
+            <button class='btn btn-default' onclick='task1();'>Все большие буквы</button>
+            <button class='btn btn-default' onclick='task2();'>Все маленькие буквы</button>
+            <button class='btn btn-default' onclick='task3();'>Все слова с большой буквы</button>
+            <button class='btn btn-default' onclick='task4();'>Первое слово с большой буквы</button>
+            <button class='btn btn-default' onclick='task5();'>Добавить плюсы перед словами</button>
+            <button class='btn btn-default' onclick='task6();'>Удалить плюсы перед словами</button>
+            <button class='btn btn-default' onclick='task7();'>Добавить кавычки в начале и в конце строки</button>
+            <button class='btn btn-default' onclick='task8();'>Добавить квадратные скобки  в начале и в конце строки</button>
+            <button class='btn btn-default' onclick='task9();'>Добавить тире в самом начале</button>
+            <button class='btn btn-default' onclick='task10();'>Добавить квадратные скобки в начале и в конце строки и тире в самом начале</button>
+            <button class='btn btn-default' onclick='task11();'>Добавить кавычки в начале и в конце строки и тире в самом начале</button>
+            <button class='btn btn-default' onclick='task12();'>Удалить лишние пробелы</button>
+            <button class='btn btn-default' onclick='task13();'>Удалить табуляцию</button>
+            <button class='btn btn-default' onclick='task14();'>Удалить все справа в строке после символов "пробел дефис", включая сам дефис</button>
+            <button class='btn btn-default' onclick='task15();'>Заменить пробелы на знак подчеркивания</button>
+            <button class='btn btn-default' onclick='task16();'>Удалить спец символы. Спец символы</button>
+            <button class='btn btn-default' onclick='task17();'>Заменить спец символы на пробелы</button>
+            <button class='btn btn-default' onclick='task18();'>Поиск замена в виде двух полей заполняемыми пользователем</button>
+            <button class='btn btn-default' onclick='task19();'>Сортировать А-Я, сортироваться должны строки</button>
+            <button class='btn btn-default' onclick='task20();'>Сортировать Я-А, сортироваться должны строки</button>
+            <button class='btn btn-default' onclick='task21();'>Удалить дубликаты</button>
+        </aside>
+        <main class='col-lg-7 col-md-6 col-sm-6 col-xs-6'>
+             <textarea id="main_textarea" placeholder="Введите список фраз" name="text">сОк цЕНа</textarea>
+             <button class='btn btn-primary' onclick='_Undo();'>Undo</button>
+             <button class='btn btn-primary' onclick='_Redo();'>Redo</button>
+             <button class='btn btn-primary' onclick='_Clear();'>Clear</button>
+             <button class='btn btn-primary' onclick='_Copy();'>Copy</button>
+            
+        </main>
+    </div>
+      
+    
+    <script>
+        var text = document.getElementById('main_textarea'),
+            buffer = [],
+            shiftBuffer=1;
+        
+        // Undo:
+        function _Undo(){
+            if(buffer.length == 0 || !buffer[buffer.length-shiftBuffer]) return 0;
+            shiftBuffer++;
+            text.value = buffer[buffer.length-shiftBuffer];
+            
+        }
+        
+        // Redo:
+        function _Redo(){
+           
+            if(buffer.length == 0 || !buffer[buffer.length-shiftBuffer]) return 0;
+             shiftBuffer--;
+            text.value = buffer[buffer.length-shiftBuffer];
+           
+        }
+        
+        // Clear:
+        function _Clear(){
+            bufferSet();
+            text.value = '';
+        }
+        
+        // Buffer:
+        function bufferSet(){
+            if(buffer[buffer.length-1] == text.value) return 0;
+            buffer.push(text.value);
+        }
+        
+        // Copy:
+        function _Copy(){
+            text.select(); // Выделяем весь текст в input
+            document.execCommand('copy'); // Магия! Копирует в буфер выделенный текст (см. команду выше)
+        }
+        
+        // 
+        if(!String.prototype.toLocaleCapitalize){
+            String.prototype.toLocaleCapitalize = function(){
+                var a = this.split(" ");
+                for(var i = 0, len=a.length;i<len; i++){
+                    a[i]=a[i][0].toLocaleUpperCase()+a[i].substr(1).toLocaleLowerCase();
+                }
+                return a.join(" ");
+            }
+        }
+
+        
+        
+        function task1(){
+            bufferSet();
+            text.value = text.value.toLocaleUpperCase();
+        }
+        function task2(){
+            bufferSet();
+            text.value = text.value.toLocaleLowerCase();
+        }
+        function task3(){
+            bufferSet();
+            text.value = text.value.toLocaleCapitalize();
+        }
+        function task4(){
+            bufferSet();
+            text.value = text.value[0].toUpperCase()+text.value.substr(1).toLowerCase()
+        }
+        function task5(){
+             bufferSet();
+             var a = text.value.split(" ");
+             for(var i = 0, len=a.length;i<len; i++){
+                a[i]='+'+a[i];
+             }
+             text.value = a.join(" ");
+        }
+  
+        
+        function task6(){
+            bufferSet();
+            var a = text.value.split(" ");
+            for(var i = 0, len=a.length;i<len; i++){
+                if(a[i][0] == '+')
+                a[i]=a[i].substr(1);
+            }
+            text.value = a.join(" ");
+        }
+        function task7(){
+             bufferSet();
+             var a = text.value.split("\n");
+             for(var i = 0, len=a.length;i<len; i++){
+                if(a[i].trim().length>0)
+                a[i]='"'+a[i]+'"';
+             }
+             text.value = a.join("\n");
+        }
+        function task8(){
+             bufferSet();
+             var a = text.value.split("\n");
+             for(var i = 0, len=a.length;i<len; i++){
+                if(a[i].trim().length>0)
+                a[i]='['+a[i]+']';
+             }
+             text.value = a.join("\n");
+        }
+        function task9(){
+             bufferSet();
+             text.value = "-"+text.value;
+        }
+        function task10(){
+            bufferSet();
+            task9();
+            task8();
+        }
+        function task11(){
+            bufferSet();
+            task9();
+            task7();
+        }
+        function task12(){
+            bufferSet(); 
+            text.value = text.value.trim();
+            while(text.value.indexOf("  ") != -1){
+                text.value = text.value.replace('  ', ' ');
+            }
+        }
+        function task13(){
+             bufferSet(); 
+             while(text.value.indexOf("\t") != -1){
+                text.value = text.value.replace('\t', '');
+            }
+        }
+         function task14(){
+             bufferSet(); 
+             var defis_tu_de = text.value.indexOf('-');
+             if(!~defis_tu_de){
+                 defis_tu_de = text.value.length;
+             }
+             text.value = text.value.substr(0, defis_tu_de);
+        }
+        function task15(){
+            bufferSet(); 
+            while(text.value.indexOf(" ") != -1){
+                text.value = text.value.replace(' ', '_');
+            }
+        }
+        function task16(){
+            bufferSet(); 
+  
+            while(text.value.search(/[\(\)`~!@#$%^&*_=+\[\]\\\{\}|;':",/<>?]+/) != -1){
+                text.value = text.value.replace(/[\(\)`~!@#$%^&*_=+\[\]\\\{\}|;':",/<>?]+/, '');
+            }
+        }
+         function task17(){
+            bufferSet(); 
+            while(text.value.search(/[\(\)`~!@#$%^&*_=+\[\]\\\{\}|;':",/<>?]+/) != -1){
+                text.value = text.value.replace(/[\(\)`~!@#$%^&*_=+\[\]\\\{\}|;':",/<>?]+/, ' ');
+            }
+        }
+        function task18(){
+            bufferSet(); 
+            var find = prompt('Find: ', ''),
+                replace = prompt('Replace: ', '');
+            
+            while(text.value.indexOf(find) != -1){
+                text.value = text.value.replace(find, replace);
+            }
+        }
+        function task19(){
+             bufferSet();
+             var a = text.value.split("\n").sort(function(a, b){
+                 return a.localeCompare(b);
+             });
+             
+             text.value = a.join("\n");
+        }
+        function task20(){
+             bufferSet();
+             var a = text.value.split("\n").sort(function(a, b){
+                 return b.localeCompare(a);
+             });
+             
+             text.value = a.join("\n");
+        }
+        function task21(){
+             bufferSet();
+             var a = text.value.split("\n"),
+                 n = []; 
+             for(var i = 0; i < a.length; i++) 
+                if (n.indexOf(a[i]) == -1)
+                    n.push(a[i]);
+             text.value = n.join("\n");
+        }
+    </script>
+    
+</body>
+</html>
